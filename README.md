@@ -33,6 +33,7 @@ Make sure MongoDB is running locally (`mongod`), then:
 
 ```bash
 npm install
+cp .env.example .env
 npm start
 ```
 
@@ -40,13 +41,7 @@ Runs on http://localhost:3000. UI is at http://localhost:3000/ui.
 
 For dev with auto-restart: `npm run dev`
 
-The `.env` file already has defaults so it should work out of the box:
-```
-PORT=3000
-MONGO_URI=mongodb://127.0.0.1:27017/taskmanager
-```
-
-If you're using Atlas, just swap the `MONGO_URI`.
+The default `.env` points to a local MongoDB instance. If you're using Atlas, swap `MONGO_URI` for your connection string.
 
 ## API
 
