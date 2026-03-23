@@ -98,7 +98,49 @@ textarea {
 
 .btn-primary { background: #3498db; color: #fff; }
 .btn-danger  { background: #e74c3c; color: #fff; }
+.btn-edit    { background: #f39c12; color: #fff; margin-right: 6px; }
 .btn-sm      { padding: 6px 12px; font-size: 0.8rem; }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+
+.modal-box {
+  background: #fff;
+  border-radius: 10px;
+  padding: 28px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.modal-box h2 {
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+  color: #2c3e50;
+  border-bottom: 2px solid #f39c12;
+  padding-bottom: 8px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.modal-actions .btn:first-child {
+  background: #e2e3e5;
+  color: #383d41;
+}
 
 table {
   width: 100%;

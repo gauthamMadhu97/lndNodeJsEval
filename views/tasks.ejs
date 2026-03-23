@@ -75,6 +75,15 @@
                 </td>
                 <td><%= new Date(task.createdAt).toLocaleDateString() %></td>
                 <td>
+                  <button
+                    class="btn btn-edit btn-sm"
+                    data-id="<%= task._id %>"
+                    data-title="<%= task.title %>"
+                    data-description="<%= task.description || '' %>"
+                    data-status="<%= task.status %>"
+                    data-priority="<%= task.priority %>"
+                    onclick="openEditModal(this)"
+                  >Edit</button>
                   <form action="/ui/tasks/<%= task._id %>/delete" method="POST" style="display:inline">
                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                   </form>
@@ -90,5 +99,63 @@
       <p>Mini Task Manager API &mdash; Node.js + Express + MongoDB + EJS</p>
     </footer>
   </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal-overlay" onclick="closeEditModal(event)">
+    <div class="modal-box">
+      <h2>Edit Task</h2>
+      <form id="editForm" method="POST">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="editTitle" name="title" required />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="editDescription" name="description"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Status</label>
+            <select id="editStatus" name="status">
+              <option value="pending">Pending</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="editPriority" name="priority">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openEditModal(btn) {
+      document.getElementById('editForm').action = '/ui/tasks/' + btn.dataset.id + '/edit';
+      document.getElementById('editTitle').value = btn.dataset.title;
+      document.getElementById('editDescription').value = btn.dataset.description;
+      document.getElementById('editStatus').value = btn.dataset.status;
+      document.getElementById('editPriority').value = btn.dataset.priority;
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    function closeEditModal(event) {
+      if (event.target === document.getElementById('editModal')) closeModal();
+    }
+  </script>
 </body>
 </html>

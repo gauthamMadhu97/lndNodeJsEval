@@ -11,36 +11,29 @@ const taskEmitter = require('./src/events/taskEvents');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- Connect to Database ---
 connectDB();
 
-// --- View Engine ---
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- Middleware ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(requestLogger); // logs every request to logs.txt
+app.use(requestLogger);
 
-// --- API Routes ---
 app.use('/tasks', taskRoutes);
 
-// --- UI Routes (Template Engine) ---
-
-// GET /ui → display all tasks in EJS view
+// UI routes — form-based so we use POST instead of PUT/DELETE
 app.get('/ui', async (req, res) => {
   try {
     const tasks = await Task.find().sort({ createdAt: -1 });
     res.render('tasks', { tasks });
   } catch (error) {
-    console.error('[UI] Failed to load tasks:', error.message);
+    console.error('Failed to load tasks:', error.message);
     res.status(500).send('Error loading tasks');
   }
 });
 
-// POST /ui/tasks → create task via form, then redirect
 app.post('/ui/tasks', async (req, res) => {
   try {
     const { title, description, status, priority } = req.body;
@@ -48,24 +41,43 @@ app.post('/ui/tasks', async (req, res) => {
     taskEmitter.emit('task:created', task);
     res.redirect('/ui');
   } catch (error) {
-    console.error('[UI] Failed to create task:', error.message);
+    console.error('Failed to create task:', error.message);
     res.status(500).send('Error creating task: ' + error.message);
   }
 });
 
-// POST /ui/tasks/:id/delete → delete via form (browsers only support GET/POST)
+app.post('/ui/tasks/:id/edit', async (req, res) => {
+  try {
+    const { title, description, status, priority } = req.body;
+    const updates = {};
+    if (title !== undefined) updates.title = title;
+    if (description !== undefined) updates.description = description;
+    if (status !== undefined) updates.status = status;
+    if (priority !== undefined) updates.priority = priority;
+
+    const task = await Task.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true,
+    });
+    if (task) taskEmitter.emit('task:updated', task);
+    res.redirect('/ui');
+  } catch (error) {
+    console.error('Failed to update task:', error.message);
+    res.status(500).send('Error updating task: ' + error.message);
+  }
+});
+
 app.post('/ui/tasks/:id/delete', async (req, res) => {
   try {
     const task = await Task.findByIdAndDelete(req.params.id);
     if (task) taskEmitter.emit('task:deleted', req.params.id);
     res.redirect('/ui');
   } catch (error) {
-    console.error('[UI] Failed to delete task:', error.message);
+    console.error('Failed to delete task:', error.message);
     res.status(500).send('Error deleting task');
   }
 });
 
-// --- Root Redirect ---
 app.get('/', (req, res) => {
   res.json({
     message: 'Mini Task Manager API',
@@ -81,22 +93,18 @@ app.get('/', (req, res) => {
   });
 });
 
-// --- 404 Handler ---
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
 });
 
-// --- Global Error Handler ---
 app.use((err, req, res, next) => {
-  console.error('[App] Unhandled error:', err.message);
+  console.error('Unhandled error:', err.message);
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
-// --- Start Server ---
 app.listen(PORT, () => {
-  console.log(`[App] Server running on http://localhost:${PORT}`);
-  console.log(`[App] UI available at http://localhost:${PORT}/ui`);
-  console.log(`[App] Environment: ${process.env.NODE_ENV}`);
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`UI: http://localhost:${PORT}/ui`);
 });
 
 module.exports = app;

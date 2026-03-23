@@ -1,7 +1,6 @@
 const Task = require('../models/Task');
 const taskEmitter = require('../events/taskEvents');
 
-// POST /tasks
 const createTask = async (req, res) => {
   try {
     const { title, description, status, priority } = req.body;
@@ -11,18 +10,15 @@ const createTask = async (req, res) => {
     }
 
     const task = await Task.create({ title, description, status, priority });
-
-    // Fire custom event
     taskEmitter.emit('task:created', task);
 
     return res.status(201).json({ success: true, data: task });
   } catch (error) {
-    console.error('[Controller] createTask error:', error.message);
+    console.error('createTask error:', error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// GET /tasks
 const getAllTasks = async (req, res) => {
   try {
     const { status, priority } = req.query;
@@ -33,12 +29,11 @@ const getAllTasks = async (req, res) => {
     const tasks = await Task.find(filter).sort({ createdAt: -1 });
     return res.status(200).json({ success: true, count: tasks.length, data: tasks });
   } catch (error) {
-    console.error('[Controller] getAllTasks error:', error.message);
+    console.error('getAllTasks error:', error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// GET /tasks/:id
 const getTaskById = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -49,7 +44,7 @@ const getTaskById = async (req, res) => {
 
     return res.status(200).json({ success: true, data: task });
   } catch (error) {
-    console.error('[Controller] getTaskById error:', error.message);
+    console.error('getTaskById error:', error.message);
     if (error.name === 'CastError') {
       return res.status(400).json({ success: false, message: 'Invalid task ID format' });
     }
@@ -57,7 +52,6 @@ const getTaskById = async (req, res) => {
   }
 };
 
-// PUT /tasks/:id
 const updateTask = async (req, res) => {
   try {
     const { title, description, status, priority } = req.body;
@@ -77,10 +71,9 @@ const updateTask = async (req, res) => {
     }
 
     taskEmitter.emit('task:updated', task);
-
     return res.status(200).json({ success: true, data: task });
   } catch (error) {
-    console.error('[Controller] updateTask error:', error.message);
+    console.error('updateTask error:', error.message);
     if (error.name === 'CastError') {
       return res.status(400).json({ success: false, message: 'Invalid task ID format' });
     }
@@ -88,7 +81,6 @@ const updateTask = async (req, res) => {
   }
 };
 
-// DELETE /tasks/:id
 const deleteTask = async (req, res) => {
   try {
     const task = await Task.findByIdAndDelete(req.params.id);
@@ -98,10 +90,9 @@ const deleteTask = async (req, res) => {
     }
 
     taskEmitter.emit('task:deleted', req.params.id);
-
-    return res.status(200).json({ success: true, message: 'Task deleted successfully' });
+    return res.status(200).json({ success: true, message: 'Task deleted' });
   } catch (error) {
-    console.error('[Controller] deleteTask error:', error.message);
+    console.error('deleteTask error:', error.message);
     if (error.name === 'CastError') {
       return res.status(400).json({ success: false, message: 'Invalid task ID format' });
     }
